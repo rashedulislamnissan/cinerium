@@ -18,17 +18,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       # the site is served from /cinerium/, so every asset and route is built under that base
       - run: npm run build -- --base /cinerium/
-      # GitHub Pages has no SPA rewrites: serve the app for unknown paths so deep links work
-      - run: cp dist/index.html dist/404.html && touch dist/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
+      # GitHub Pages has no SPA rewrites. Give every public route a real index.html so it
+      # answers 200 (deep links, link previews, search engines); film slugs come from the
+      # poster files. Anything else (e.g. /book/<show>) falls back to 404.html, which is the app.
+      - name: Static entry points for client-side routes
+        run: |
+          routes="films showtimes halls tickets checkout about"
+          for f in public/media/posters/*-640.webp; do
+            slug=$(basename "$f" -640.webp)
+            routes="$routes films/$slug"
+          done
+          for r in $routes; do
+            mkdir -p "dist/$r" && cp dist/index.html "dist/$r/index.html"
+          done
+          cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -40,4 +52,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
