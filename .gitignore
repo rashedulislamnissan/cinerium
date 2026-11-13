@@ -1,0 +1,22 @@
+node_modules
+dist
+dist-*
+*.log
+.DS_Store
+.env
+*.tsbuildinfo
+
+# Kept on the owner's machine only — the public repo holds just what the site needs to run.
+CINERIUM_MASTER_PLAN.md
+CLAUDE.md
+README.md
+docs/
+tests/
+brand/
+vitest.config.ts
+src/**/*.test.ts
+# original artwork and source reel (the site ships optimised copies in public/media)
+/*.jpeg
+/*.jpg
+/*.png
+/*.mp4
